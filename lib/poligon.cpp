@@ -226,6 +226,21 @@ void check2(std::vector<Line> lines)
 
         }
     }
+
+    if (vecpro(lines[lines.size() - 1], lines[0]) > 0)
+    {
+        pos += 1;
+    }
+    if (vecpro(lines[lines.size() - 1], lines[0]) < 0)
+    {
+        neg += 1;
+
+    }
+    if (vecpro(lines[lines.size() - 1], lines[0]) == 0)
+    {
+        zeros += 1;
+
+    }
     if (!((neg == 0 || pos == 0) && zeros == 0))
     {
         std::cout << "The polygon is non-convex.";
