@@ -2,96 +2,71 @@
 /// @brief Файл реализации библиотеки.
 #include"poligon.h"
 
-CPoint::CPoint(int x, int y)
-    :x(x), y(y) {}
-CPoint::CPoint(const CPoint& a)
-    : x(a.x), y(a.y) {}
-CPoint::CPoint(const cv::Point& a)
-    : x(a.x), y(a.y) {}
-void CPoint::DrawPoint(cv::Mat imeg)
+
+std::ostream& writeTo(std::ostream& ostrm, const cv::Point2d &A)
 {
-    circle(imeg, cv::Point(x, y), 3, cv::Scalar(255, 255, 255), -1, 8);
-}
-void CPoint::DrawPoint(cv::Mat imeg, cv::Scalar color)
-{
-    circle(imeg, cv::Point(x, y), 3, color, -1, 8);
-}
-const bool CPoint::operator == (const CPoint p)
-{
-    if (this->x == p.x && this->y == p.y)
-        return true;
-    else return false;
-}
-const bool CPoint::operator!=(const CPoint p)
-{
-    if (this->x == p.x && this->y == p.y)
-        return false;
-    else return true;
-}
-std::ostream& CPoint::writeTo(std::ostream& ostrm) const
-{
-    ostrm << x << " " << y;
+    ostrm << A.x << " " << A.y;
     return ostrm;
 }
 
-std::istream& CPoint::readFrom(std::istream& istrm)
+std::istream& readFrom(std::istream& istrm, cv::Point2d& A)
 {
-    int xin(0);
-    int yin(0);
+    double xin(0);
+    double yin(0);
     istrm >> xin >> yin;
     if (istrm.good())
     {
-        x = xin;
-        y = yin;
+        A.x = xin;
+        A.y = yin;
     }
     return istrm;
 }
 
 
-bool compP(CPoint p, std::vector<CPoint> points)
+bool compP(const cv::Point2d& p, const std::vector<cv::Point2d>& points)
 {
     bool res = false;
     for (int i = 0; i < points.size(); i++)
     {
-        if (p == points[i])
+        if (std::abs(p.x - points[i].x) <= std::numeric_limits<double>::epsilon() && std::abs(p.y - points[i].y) <= std::numeric_limits<double>::epsilon())
             res = true;
     }
     return res;
 }
 
 
-Line::Line(CPoint A, CPoint B)
+Edge::Edge(const cv::Point2d& A, const cv::Point2d& B)
     :A(A), B(B) {}
-Line::Line(CPoint A, CPoint B, int thickness)
+Edge::Edge(const cv::Point2d& A, const cv::Point2d& B, int thickness)
     : A(A), B(B), thickness(thickness) {}
-Line::Line(CPoint A, CPoint B, int thickness, int linetype)
+Edge::Edge(const cv::Point2d& A,const cv::Point2d& B, int thickness, int linetype)
     : A(A), B(B), thickness(thickness), linetype(linetype) {}
-Line::Line(CPoint A, CPoint B, int thickness, int linetype, int shift)
+Edge::Edge(const cv::Point2d& A,const cv::Point2d& B, int thickness, int linetype, int shift)
     : A(A), B(B), thickness(thickness), linetype(linetype), shift(shift) {}
-Line::Line(const Line& A)
+Edge::Edge(const Edge& A)
     : A(A.A), B(A.B) {}
-void Line::DrawLine(cv::Mat imeg)
+void Edge::DrawLine(cv::Mat& imeg)
 {
-    line(imeg, cv::Point(A.x, A.y), cv::Point(B.x, B.y), cv::Scalar(255, 255, 255), thickness, linetype, shift);
+    line(imeg, cv::Point2d(A.x, A.y), cv::Point2d(B.x, B.y), cv::Scalar(255, 255, 255), thickness, linetype, shift);
 }
-void Line::DrawLine(cv::Mat imeg, cv::Scalar color)
+void Edge::DrawLine(cv::Mat& imeg, cv::Scalar color)
 {
-    line(imeg, cv::Point(A.x, A.y), cv::Point(B.x, B.y), color, thickness, linetype, shift);
+    line(imeg, cv::Point2d(A.x, A.y), cv::Point2d(B.x, B.y), color, thickness, linetype, shift);
 }
-int Line::Lenght()
+double Edge::Lenght() const
 {
-    CPoint a(A);
-    CPoint b(B);
+    cv::Point2d a(A);
+    cv::Point2d b(B);
     return sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
 }
 
 
-bool crossP(Line A, Line B)
+bool crossP(const Edge& A,const Edge& B)
 {
-    CPoint a(A.A);
-    CPoint b(A.B);
-    CPoint c(B.A);
-    CPoint d(B.B);
+    cv::Point2d a(A.A);
+    cv::Point2d b(A.B);
+    cv::Point2d c(B.A);
+    cv::Point2d d(B.B);
     double x1(a.x), y1(a.y), x2(b.x), y2(b.y), x3(c.x), y3(c.y), x4(d.x), y4(d.y);
     double Ua, Ub, numerator_a, numerator_b, denominator;
     denominator = (y4 - y3) * (x1 - x2) - (x4 - x3) * (y1 - y2);
@@ -109,12 +84,12 @@ bool crossP(Line A, Line B)
     }
 }
 
-bool crossLn(Line A, Line B)
+bool crossLn(const Edge& A,const Edge& B)
 {
-    CPoint a(A.A);
-    CPoint b(A.B);
-    CPoint c(B.A);
-    CPoint d(B.B);
+    cv::Point2d a(A.A);
+    cv::Point2d b(A.B);
+    cv::Point2d c(B.A);
+    cv::Point2d d(B.B);
     double x1(a.x), y1(a.y), x2(b.x), y2(b.y), x3(c.x), y3(c.y), x4(d.x), y4(d.y);
     double Ua, Ub, numerator_a, numerator_b, denominator;
     denominator = (y4 - y3) * (x1 - x2) - (x4 - x3) * (y1 - y2);
@@ -131,23 +106,23 @@ bool crossLn(Line A, Line B)
         return (Ua >= 0 && Ua <= 1 && Ub >= 0 && Ub <= 1 ? false : false);
     }
 }
-int vecpro(Line A, Line B)
+double vecpro(const Edge& A,const Edge& B)
 {
-    int x1(A.B.x - A.A.x);
-    int y1(A.B.y - A.A.y);
-    int x2(B.B.x - B.A.x);
-    int y2(B.B.y - B.A.y);
+    double x1(A.B.x - A.A.x);
+    double y1(A.B.y - A.A.y);
+    double x2(B.B.x - B.A.x);
+    double y2(B.B.y - B.A.y);
     return x1 * y2 - y1 * x2;
 }
 
-CPoint CrossPoint(Line A, Line B)
+cv::Point2d CrossPoint(const Edge& A,const Edge& B)
 {
-    int det, x1, y1, x2, y2, x3, y3, x4, y4, a1, a2, b1, b2, c1, c2;
-    CPoint T;
-    CPoint a(A.A);
-    CPoint b(A.B);
-    CPoint c(B.A);
-    CPoint d(B.B);
+    double det, x1, y1, x2, y2, x3, y3, x4, y4, a1, a2, b1, b2, c1, c2;
+    cv::Point2d T;
+    cv::Point2d a(A.A);
+    cv::Point2d b(A.B);
+    cv::Point2d c(B.A);
+    cv::Point2d d(B.B);
     x1 = A.A.x;
     y1 = A.A.y;
     x2 = A.B.x;
@@ -170,20 +145,20 @@ CPoint CrossPoint(Line A, Line B)
     }
     return T;
 }
-Line CrossLine(Line A, Line B)
+Edge CrossLine(const Edge& A,const Edge& B)
 {
-    CPoint a(A.A);
-    CPoint b(A.B);
-    CPoint c(B.A);
-    CPoint d(B.B);
+    cv::Point2d a(A.A);
+    cv::Point2d b(A.B);
+    cv::Point2d c(B.A);
+    cv::Point2d d(B.B);
 
-    int ALenght(A.Lenght());
-    int BLenght(B.Lenght());
+    float ALenght(A.Lenght());
+    float BLenght(B.Lenght());
     return (ALenght < BLenght ? A : B);
 }
 
 
-void check1(std::vector<CPoint> points)
+void check1(const std::vector<cv::Point2d> &points)
 {
     if (points.size() < 3)
     {
@@ -203,7 +178,7 @@ void check1(std::vector<CPoint> points)
     }
 
 }
-void check2(std::vector<Line> lines)
+void check2(const std::vector<Edge> &lines)
 {
 
     int pos{ 0 };
@@ -254,78 +229,78 @@ Poligon::Poligon(const Poligon& P)
     check2(lines);
 }
 
-Poligon::Poligon(std::vector<CPoint> cpoints)
+Poligon::Poligon(const std::vector<cv::Point2d>& cpoints)
 {
     check1(cpoints);
     points = cpoints;
     for (std::ptrdiff_t i = 0; i < cpoints.size() - 1; ++i)
     {
-        Line newline(cpoints[i], cpoints[i + 1]);
+        Edge newline(cpoints[i], cpoints[i + 1]);
         lines.push_back(newline);
     }
-    Line newline(cpoints[cpoints.size() - 1], cpoints[0]);
+    Edge newline(cpoints[cpoints.size() - 1], cpoints[0]);
     lines.push_back(newline);
     check2(lines);
 }
 
 
-Poligon::Poligon(std::vector<cv::Point> cpoints)
-{
-    points.clear();
-    for (size_t i = 0; i < cpoints.size(); i++)
-    {
-        CPoint tmp = cpoints[i];
-        points.push_back(tmp);
-    }
-    check1(points);
-    for (std::ptrdiff_t i = 0; i < cpoints.size() - 1; ++i)
-    {
-        Line newline(cpoints[i], cpoints[i + 1]);
-        lines.push_back(newline);
-    }
-    Line newline(cpoints[cpoints.size() - 1], cpoints[0]);
-    lines.push_back(newline);
-    check2(lines);
-}
+//Poligon::Poligon(std::vector<cv::Point> cpoints)
+//{
+//    points.clear();
+//    for (size_t i = 0; i < cpoints.size(); i++)
+//    {
+//        cv::Point tmp = cpoints[i];
+//        points.push_back(tmp);
+//    }
+//    check1(points);
+//    for (std::ptrdiff_t i = 0; i < cpoints.size() - 1; ++i)
+//    {
+//        Line newline(cpoints[i], cpoints[i + 1]);
+//        lines.push_back(newline);
+//    }
+//    Line newline(cpoints[cpoints.size() - 1], cpoints[0]);
+//    lines.push_back(newline);
+//    check2(lines);
+//}
 
 
-void Poligon::DrawPoints(cv::Mat imeg, cv::Scalar color)
+void Poligon::DrawPoints(cv::Mat& imeg, cv::Scalar color)
 {
     for (std::ptrdiff_t i = 0; i < points.size(); ++i)
     {
-        circle(imeg, cv::Point(points[i].x, points[i].y), 3, color, -1, 8);
+        circle(imeg, points[i], 3, color, -1, 8);
     }
 }
-void Poligon::DrawLines(cv::Mat imeg, cv::Scalar color)
+void Poligon::DrawLines(cv::Mat& imeg, cv::Scalar color)
 {
     for (int i = 0; i < lines.size(); ++i)
     {
-        line(imeg, cv::Point(lines[i].A.x, lines[i].A.y), cv::Point(lines[i].B.x, lines[i].B.y), color, 2, 8, 0);
+        line(imeg, cv::Point2d(lines[i].A.x, lines[i].A.y), cv::Point2d(lines[i].B.x, lines[i].B.y), color, 2, 8, 0);
     }
-    line(imeg, cv::Point(lines[0].A.x, lines[0].A.y), cv::Point(lines[lines.size() - 1].B.x, lines[lines.size() - 1].B.y), color, 2, 8, 0);
+    line(imeg, cv::Point2d(lines[0].A.x, lines[0].A.y), cv::Point2d(lines[lines.size() - 1].B.x, lines[lines.size() - 1].B.y), color, 2, 8, 0);
 }
 
-void Poligon::DrawPoligon(cv::Mat imeg, cv::Scalar color)
+void Poligon::DrawPoligon(cv::Mat& imeg, cv::Scalar color)
 {
     DrawPoints(imeg, color);
     DrawLines(imeg, color);
 }
 
-std::ostream& Poligon::writeTo(std::ostream& ostrm) const
+std::ostream& Poligon::write(std::ostream& ostrm) const
 {
     for (size_t i = 0; i < points.size(); i++)
     {
-        points[i].writeTo(ostrm);
+        writeTo(ostrm, points[i]);
         ostrm << std::endl;
     }
     return ostrm;
 }
 
-std::istream& Poligon::readFrom(std::istream& istrm)
+std::istream& Poligon::read(std::istream& istrm)
 {
-    CPoint p;
+    cv::Point2d p;
     points.clear();
-    while (p.readFrom(istrm))
+    while (readFrom(istrm,p))
     {
         this->points.push_back(p);
     }
@@ -336,14 +311,14 @@ std::istream& Poligon::readFrom(std::istream& istrm)
 
 
 
-bool Interpoint(const Poligon P, const CPoint a)
+bool Interpoint(const Poligon& P, const cv::Point2d& a)
 {
     int pos{ 0 };
     int neg{ 0 };
     int zeros{ 0 };
     for (size_t i = 0; i < P.lines.size(); i++)
     {
-        Line newline(P.lines[i].A, a);
+        Edge newline(P.lines[i].A, a);
         if (vecpro(P.lines[i], newline) > 0)
         {
             pos += 1;
@@ -364,7 +339,7 @@ bool Interpoint(const Poligon P, const CPoint a)
     if ((neg == 0 || pos == 0) && zeros == 0) return true;
     else return false;
 }
-double veclen(Line l)
+double veclen(const Edge& l)
 {
     double ax = l.B.x - l.A.x;
     double ay = l.B.y - l.A.y;
@@ -372,14 +347,14 @@ double veclen(Line l)
 }
 
 
-double angle(Line l1, Line l2)
+double angle(const Edge& l1,const Edge& l2)
 {
     double res;
     double ax = l1.B.x - l1.A.x;
     double bx = l2.B.x - l2.A.x;
     double ay = l1.B.y - l1.A.y;
     double by = l2.B.y - l2.A.y;
-    Line l3(l1.B, l2.B);
+    Edge l3(l1.B, l2.B);
     double len1 = veclen(l1) * veclen(l1);
     double len2 = veclen(l2) * veclen(l2);
     double len3 = veclen(l3) * veclen(l3);
@@ -388,35 +363,41 @@ double angle(Line l1, Line l2)
 }
 
 
-void sortPoint(std::vector<CPoint>& points)
+void sortPoint(std::vector<cv::Point2d>& points)
 {
-    int min = points[0].y;
+    double min_x = points[0].x;
+    double min_y = points[0].y;
     int min_id = 0;
     for (size_t i = 0; i < points.size(); i++)
     {
-        if (points[i].y < min)
+        if (points[i].y < min_y)
         {
-            min = points[i].y;
+            min_y = points[i].y;
+            min_id = i;
+        }
+        if (points[i].y == min_y && points[i].x<min_x)
+        {
+            min_x = points[i].x;
             min_id = i;
         }
     }
-    int width = points[min_id].x;
-    int height = min;
-    int widthmat(width + 10);
-    CPoint tmp = points[0];
+    double width = points[min_id].x;
+    double height = points[min_id].y;
+    double widthmat(width + 10);
+    cv::Point2d tmp = points[0];
     points[0] = points[min_id];
     points[min_id] = tmp;
-    CPoint zero(width, height);
-    CPoint direct(widthmat, height);
-    Line abs(zero, direct);
+    cv::Point2d zero(width, height);
+    cv::Point2d direct(widthmat, height);
+    Edge abs(zero, direct);
     for (int j = 0; j < points.size() - 1; j++)
         for (int i = 0; i < points.size() - 1; i++)
         {
-            Line l1(zero, points[i]);
-            Line l2(zero, points[i + 1]);
+            Edge l1(zero, points[i]);
+            Edge l2(zero, points[i + 1]);
             if ((angle(abs, l1) > angle(abs, l2)))
             {
-                CPoint tmp = points[i];
+                cv::Point2d tmp = points[i];
                 points[i] = points[i + 1];
                 points[i + 1] = tmp;
             }
@@ -425,11 +406,11 @@ void sortPoint(std::vector<CPoint>& points)
 
 
 
-Poligon Interseption(Poligon A, Poligon B) {
-    std::vector<CPoint> points;
-    std::vector<Line> lines;
-    std::vector<std::vector<CPoint>> foundLinesA;
-    std::vector<std::vector<CPoint>> foundLinesB;
+Poligon Interseption(const Poligon& A,const Poligon& B) {
+    std::vector<cv::Point2d> points;
+    std::vector<Edge> lines;
+    std::vector<std::vector<cv::Point2d>> foundLinesA;
+    std::vector<std::vector<cv::Point2d>> foundLinesB;
     for (int i = 0; i < A.lines.size(); i++)
     {
         for (int j = 0; j < B.lines.size(); j++)
@@ -460,7 +441,7 @@ Poligon Interseption(Poligon A, Poligon B) {
     for (int j = 0; j < A.points.size(); j++)
     {
 
-        if (Interpoint(B, A.points[j]))
+        if (Interpoint(B, A.points[j]) && !compP(A.points[j], points))
         {
             points.push_back(A.points[j]);
         }
