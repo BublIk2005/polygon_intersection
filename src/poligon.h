@@ -1,7 +1,7 @@
 /// @file poligon.h
 /// @brief Заголовочный файл библиотеки 
 /// содержит определения типов данных, структуры, прототипы функций, перечисления, макросы препроцессора.
-//#pragma once
+#pragma once
 #ifndef POLIGON_POLIGON_H
 #define POLIGON_POLIGON_H
 #include<opencv2/opencv.hpp>
@@ -47,8 +47,8 @@ std::istream& readFrom(std::istream& istrm, cv::Point2d& A);
 /// @param points векотр в котором проиходит поиск.
 /// @return bool
 bool compP(const cv::Point2d &p, const std::vector<cv::Point2d> &points);
-/// @class Line
-/// @brief Класс описывающий объект линия.
+/// @class Edge
+/// @brief Класс описывающий сторону полигона.
 class Edge {
 public:
     /// @brief Точка A граница отрезка.
@@ -61,9 +61,9 @@ public:
     int linetype{ 8 };
     /// @brief Количество дробных битов в координатах точки.
     int shift{ 0 };
-    /// @brief Конструктор линии по умолчанию.
+    /// @brief Конструктор по умолчанию.
     Edge() = default;
-    /// @brief Деструктор точки по умолчанию.
+    /// @brief Деструктор по умолчанию.
     ~Edge() = default;
     /// @brief Конструктор принимающий границы отрезка.
     /// @param A граница отрезка.
@@ -88,7 +88,7 @@ public:
     /// @param shift количество дробных битов в координатах точки.
     Edge(const cv::Point2d &A,const cv::Point2d &B, int thickness, int linetype, int shift);
     /// @brief Конструктор копии.
-    /// @param A объект class Line.
+    /// @param A объект class Edge.
     Edge(const Edge& A);
     /// @brief Функция для отрисовки линии.
     /// @param imeg cv::Mat n-мерный класс плотных массивов.
@@ -97,35 +97,35 @@ public:
     /// @param imeg cv::Mat n-мерный класс плотных массивов.
     /// @param color cv::Scalar Класс шаблонов для 4-элементного вектора, производного от Vec.
     void DrawLine(cv::Mat &imeg, cv::Scalar color);
-    /// @brief Метод для нахождения длины линии.
-    /// @return Целое значение длины линии.
+    /// @brief Метод для нахождения длины отрезка.
+    /// @return Значение длины отрезка.
     double Lenght() const;
 };
 
-/// @brief Функция проверяющая существование точки пересечения двух линий.
-/// @param A Line Класс описывающий объект линия.
-/// @param B Line Класс описывающий объект линия.
+/// @brief Функция проверяющая существование точки пересечения двух отрезков.
+/// @param A Edge Класс описывающий сторону полигона.
+/// @param B Edge Класс описывающий сторону полигона.
 /// @return bool
 bool crossP(const Edge &A, const Edge &B);
 /// @brief Функция проверяющая существование отрезка пересечения двух линий.
-/// @param A Line Класс описывающий объект линия.
-/// @param B Line Класс описывающий объект линия.
+/// @param A Edge Класс описывающий сторону полигона.
+/// @param B Edge Класс описывающий сторону полигона.
 /// @return bool
 bool crossLn(const Edge &A, const Edge &B);
 /// @brief Векторное произведение.
-/// @param A Line Класс описывающий объект линия.
-/// @param B Line Класс описывающий объект линия.
+/// @param A Edge Класс описывающий сторону полигона.
+/// @param B Edge Класс описывающий сторону полигона.
 /// @return int целое значение.
 double vecpro(const Edge &A,const Edge &B);
-/// @brief Функция находящая точку пересечения двух прямых.
-/// @param A Line Класс описывающий объект линия.
-/// @param B Line Класс описывающий объект линия.
-/// @return CPoint Класс описывающий объект линия.
+/// @brief Функция находящая точку пересечения двух отрезков.
+/// @param A Edge Класс описывающий сторону полигона.
+/// @param B Edge Класс описывающий сторону полигона.
+/// @return Point2d Класс описывающий сторону полигона.
 cv::Point2d CrossPoint(const Edge &A,const Edge &B);
-/// @brief Функция находящая отрезок пересечения двух прямых.
-/// @param A Line Класс описывающий объект линия.
-/// @param B Line Класс описывающий объект линия.
-/// @return Line Класс описывающий объект линия.
+/// @brief Функция находящая отрезок пересечения двух отрезков.
+/// @param A Edge Класс описывающий сторону полигона.
+/// @param B Edge Класс описывающий сторону полигона.
+/// @return Edge Класс описывающий сторону полигона.
 Edge CrossLine(const Edge &A, const Edge &B);
 /// @brief Функция проверяющая вершины полигона на соответсвие гипотезам.
 /// @param points вектор вершин полигона.
@@ -149,7 +149,7 @@ public:
     /// @param P экземпляр класса Poligon.
     Poligon(const Poligon& P);
     /// @brief Конструктор принимающий вектор вершин полигона.
-    /// @param cpoints Вектор содержащий множество точек cv::Point полигона .
+    /// @param cpoints Вектор содержащий множество точек cv::Point2d полигона .
     Poligon(const std::vector<cv::Point2d>& cpoints);
     /// @brief Функция для отрисовки вершин полигона.
     /// @param imeg cv::Mat n-мерный класс плотных массивов.
@@ -174,16 +174,16 @@ public:
 };
 /// @brief Функция проверяющая находится ли точка внутри полигона.
 /// @param P class Poligon Полигон для которого проходит проверка.
-/// @param a class CPoint Точка которая проходит проверку.
+/// @param a cv::Point2d Точка которая проходит проверку.
 /// @return bool
 bool Interpoint(const Poligon &P, const cv::Point2d &a);
 /// @brief Функция для нахождения длины вектора
-/// @param l class Line Класс описывающий объект линия.
+/// @param l class Edge Класс описывающий сторону полигона.
 /// @return double длину вектора
 double veclen(const Edge &l);
 /// @brief Функция для нахождения косинуса угла между двумя прямыми
-/// @param l1 class Line Класс описывающий объект линия.
-/// @param l2 class Line Класс описывающий объект линия.
+/// @param l1 class Edge Класс описывающий сторону полигона.
+/// @param l2 class Edge Класс описывающий сторону полигона.
 /// @return double косинус угла между векторами.
 double angle(const Edge &l1,const Edge &l2);
 /// @brief Функция для сортировки точек. 

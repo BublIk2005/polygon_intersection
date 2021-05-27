@@ -13,6 +13,7 @@ int main() {
     //Ќаходим пересечение
     Poligon res = Interseption(test, P);
     res.DrawPoligon(imeg, Red.color);
+    //¬ыводим в консоль координаты полигона пересечени€
     res.write(std::cout);
     cv::imshow("image", imeg);
     cv::waitKey(0);
