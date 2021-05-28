@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 
+SET(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/install")
+list(APPEND CMAKE_INSTALL_RPATH
+        ${CMAKE_INSTALL_PREFIX}/rel/lib
+        ${CMAKE_INSTALL_PREFIX}/dbg/lib)
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 
@@ -12,8 +17,8 @@ set(CMAKE_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 project(poligon)
 string(TIMESTAMP time_stemp "%Y-%m-%dT%H:%M:%S")
-include_directories(src test)
-add_subdirectory(src)
+include_directories(lib test)
+add_subdirectory(lib)
 add_subdirectory(test)
 
 
