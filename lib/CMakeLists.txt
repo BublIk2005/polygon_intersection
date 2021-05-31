@@ -19,7 +19,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE .)
 
 install(TARGETS ${PROJECT_NAME}
         CONFIGURATIONS Debug
-        LIBRARY
+        polygon_intersection
         DESTINATION dbg/lib
         PUBLIC_HEADER
         DESTINATION dbg/include)
